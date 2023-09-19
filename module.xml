@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+	<Document name="intersystems-monitoring.ZPM">
+		<Module>
+			<Name>intersystems-monitoring</Name>
+			<Version>1.0.0</Version>
+			<Description>Production that gathers relevant information from all namespaces and submits it to Elastic via logstash</Description>
+			<Keywords>Elastic</Keywords>
+			<Packaging>module</Packaging>
+			<Resource Name="IRISELK.PKG"/>
+			<SourcesRoot>src</SourcesRoot>
+		    <FileCopy Name="config/config.json" Target="${mgrdir}config.json"/>
+			<Invokes>
+				<Invoke Class="IRISELK.Setup.installer" Method="PostInstall" Phase="Activate" When="After"/>
+			</Invokes>
+		</Module>
+	</Document>
+</Export>

@@ -1,0 +1,9 @@
+{
+    "stage": "dev|tst|acc|prd|other",
+    "description": "Description of the business purpose of the instance",
+    "customer": "Name of customer",
+    "logstash-url": "url of the logstash instance, e.g. https://mydomain.com/logstash",
+    "logstash-ssl-config":  "Default",
+    "logstash-check-server-identity":  false,
+    "logstash-proxy-address": "optional proxy address, e.g. http://my-proxy.com:8081"
+}
