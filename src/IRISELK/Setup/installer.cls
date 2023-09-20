@@ -45,7 +45,8 @@ ClassMethod PostInstall(productionName As %String = {..#ProductionName}, namespa
 
 	do ##class(IRISELK.BusinessOperation.Config).SetConfig()
 
-	do ..AutoStartProduction(productionName, namespace)
+	// Removed because package installers want to set the proper config before installing!!
+	#; do ..AutoStartProduction(productionName, namespace)
 
 	return $$$OK
 }

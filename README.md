@@ -50,13 +50,16 @@ This will:
     This is needed so that code can be called from all Ensemble-enabled namespaces
   - Create the SSL Configuration named "Default" as used by the Logstash sender if it doesn't exist yet
   - Sets the config based on the assumption that there is a json configuration file in location "/usr/irissys/mgr/config.json"
-    You can override that by calling the **SetConfig** method on class **IRISELK.BusinessOperation.Config** with the path of your config file:
-	
-      `do ##class(IRISELK.BusinessOperation.Config).SetConfig("your config json location")`
 
-  - Starts the production and sets it to Autostart. 
+After the package has been installed, you can override the configuration by calling the **SetConfig** method on class **IRISELK.BusinessOperation.Config** with the path of your own config file:
 
-Once installed, you'll see 
+  `do ##class(IRISELK.BusinessOperation.Config).SetConfig("your config json location")`
+
+Last step is to start the production and set it to Autostart:
+
+  `do ##class(IRISELK.Setup.installer).AutoStartProduction()`
+
+Now, when you switch to the "MONITORING" namespace and view the Production, you'll see a picture like this:
 
 ![Production screenshot](Productionscreenshot.png)
 
