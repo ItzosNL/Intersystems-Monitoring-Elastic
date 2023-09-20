@@ -42,11 +42,9 @@ ClassMethod PostInstall(productionName As %String = {..#ProductionName}, namespa
 	do ..CreateALLNamespace()
 	do ..CreatePackageMappingToALL(namespace)
 	do ..CreateDefaultSSLConfig()
+	do ..CompileProduction(productionName, namespace)
 
 	do ##class(IRISELK.BusinessOperation.Config).SetConfig()
-
-	// Removed because package installers want to set the proper config before installing!!
-	#; do ..AutoStartProduction(productionName, namespace)
 
 	return $$$OK
 }
@@ -175,7 +173,7 @@ ClassMethod setup(ByRef pVars, pLogLevel As %Integer = 3, pInstaller As %Install
 }
 
 /// Making a production Auto-Start
-ClassMethod AutoStartProduction(productionName As %String = {..#ProductionName}, namespace As %String = {..#Namespace}) As %Status
+ClassMethod CompileProduction(productionName As %String = {..#ProductionName}, namespace As %String = {..#Namespace}) As %Status
 {
 	New $NAMESPACE
 	Set $NAMESPACE = namespace
@@ -187,6 +185,15 @@ ClassMethod AutoStartProduction(productionName As %String = {..#ProductionName},
 	{
 		do $System.Status.DisplayError(sc)
 	}
+
+	return sc
+}
+
+/// Making a production Auto-Start
+ClassMethod AutoStartProduction(productionName As %String = {..#ProductionName}, namespace As %String = {..#Namespace}) As %Status
+{
+	New $NAMESPACE
+	Set $NAMESPACE = namespace
 
 	set sc = ##class(Ens.Director).StartProduction(productionName)
 
