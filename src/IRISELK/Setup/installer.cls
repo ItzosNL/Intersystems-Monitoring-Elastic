@@ -39,6 +39,7 @@ ClassMethod PreInstall(namespace As %String = {..#Namespace}) As %Status
 /// PostInstall - sets the specified production as AutoStart 
 ClassMethod PostInstall(productionName As %String = {..#ProductionName}, namespace As %String = "") As %Status
 {
+	w !,"Starting Post Install:",!
 	do ..CreateALLNamespace()
 	do ..CreatePackageMappingToALL(namespace)
 	do ..CreateDefaultSSLConfig()

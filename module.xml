@@ -3,7 +3,7 @@
 	<Document name="intersystems-monitoring.ZPM">
 		<Module>
 			<Name>intersystems-monitoring</Name>
-			<Version>1.0.3</Version>
+			<Version>1.0.4</Version>
 			<Description>Production that gathers relevant information from all namespaces and submits it to Elastic via logstash</Description>
 			<Keywords>Elastic</Keywords>
 			<Packaging>module</Packaging>
