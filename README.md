@@ -96,7 +96,27 @@ The Business Operation includes the following context information and includes i
 | server_client_name    | customer property from config.json, can be filled with the customer name                            |
 
 ## What you need to do in logstash to process your information
-TBD
+In order for the data to be stored in Elasticsearch, it first needs to be filtered in Logstash. Logstash needs a pipeline to filter this data. An example for this pipeline is provided within this repository called "pipeline.conf". The `input` section of this file contains the configuration for the inbound traffic from the Intersystems-Monitoring production. See the comments in the example file for more details.
+
+The `filter` section of this file already contains the necessary filters for the data from the Intersystems-Monitoring production. If you wish to add a service to the production, you can use the existing filters as a guideline. You could add the following to the pipeline to add data from a new service:
+
+	# rename array for filtering purposes in Kibana
+	else if [<NewDataName>] {
+		mutate {
+			rename => ["<NewDataName>", "iris" ]
+		}
+		# split array into seperate messages
+		split {
+			field => "iris"
+		}
+		# add target index for Elasticsearch and remove orginal message field
+		mutate {
+			add_field => { "[@metadata][target_index]" => "iris_newdataname_%{[headers][instance_name]}_%{[headers][instance_otap]}_%{+YYYY.MM}" } # name of index needs to be in lowercase!
+			remove_field => [ "message" ]
+		}
+	}
+ 
+The `output` section of this file contains the configuration for the outbound traffic to Elasticsearch. See the comments in the example file for more details.
 
 ## Embedding InterSystems-Monitoring in another project
 It is recommended that you include the setup of the IRISELK Monitoring production in your own installer, so that you it can be automatically deployed.
