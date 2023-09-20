@@ -15,7 +15,7 @@ XData ProductionDefinition
   <Item Name="IRISELK.Header.HeaderMonitorService" Category="" ClassName="IRISELK.Header.HeaderMonitorService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
     <Setting Target="Adapter" Name="CallInterval">60</Setting>
   </Item>
-  <Item Name="IRISELK.BusinessOperation.LogstashOutbound" Category="" ClassName="IRISELK.BusinessOperation.LogstashOutbound" PoolSize="5" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+  <Item Name="IRISELK.BusinessOperation.LogstashOutbound" Category="" ClassName="IRISELK.BusinessOperation.LogstashOutbound" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
   </Item>
   <Item Name="IRISELK.ProductionData.ProductionMonitorService" Category="" ClassName="IRISELK.ProductionData.ProductionMonitorService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
     <Setting Target="Adapter" Name="CallInterval">60</Setting>
