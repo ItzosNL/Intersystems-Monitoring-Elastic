@@ -196,11 +196,15 @@ ClassMethod AutoStartProduction(productionName As %String = {..#ProductionName},
 	New $NAMESPACE
 	Set $NAMESPACE = namespace
 
-	set sc = ##class(Ens.Director).StartProduction(productionName)
-
-	if $$$ISERR(sc)
+	// Only start production of not already running
+	if '##class(Ens.Director).IsProductionRunning()
 	{
-		do $System.Status.DisplayError(sc)
+		set sc = ##class(Ens.Director).StartProduction(productionName)
+
+		if $$$ISERR(sc)
+		{
+			do $System.Status.DisplayError(sc)
+		}
 	}
 
 	set sc = ##class(Ens.Director).SetAutoStart(productionName)

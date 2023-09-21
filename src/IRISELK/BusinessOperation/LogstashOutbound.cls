@@ -40,6 +40,7 @@ Method SendToLogstash(pRequest As Ens.Request, Output pResponse As IRISELK.Messa
 	// POST message in JSON to Logstash
 	if $ISOBJECT(config)
 	{
+		$$$TRACE("Send to logstash at '" _ config."logstash-url" _ "': ")
 		// Fill adapter from config
 		set ..Adapter.SSLConfig = config.%Get("logstash-ssl-config", "Default")
 		set ..Adapter.SSLCheckServerIdentity = config."logstash-check-server-identity"
@@ -76,6 +77,8 @@ Method SetProxy(proxyAddress As %String)
 {
 	if (proxyAddress '= "")
 	{
+		$$$TRACE("Set proxy to '" _ proxyAddress _ "': ")
+
 		set ..Adapter.ProxyHTTPS = ..StartsWith(proxyAddress, "https://")
 		
 		if (..Adapter.ProxyHTTPS)
