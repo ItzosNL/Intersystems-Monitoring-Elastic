@@ -1,6 +1,16 @@
-## InterSystems-Monitoring
-This repository provides a Production which collects information from the relevant Ensemble namespaces and send status update to Logstash, so that you can monitor your InterSystems Productions from [Kibana Discover](https://www.elastic.co/guide/en/kibana/current/discover.html)
+## What is InterSystems-Monitoring?
+[Intersystems-Monitoring](https://openexchange.intersystems.com/package/Intersystems-Monitoring) is an add-on package that you can add to any existing solution based on InterSystems IRIS and HealthConnect. It installs a Monitoring Production which collects information from the relevant Ensemble namespaces and send status update to Logstash, so that you can monitor your InterSystems Productions from [Kibana Discover](https://www.elastic.co/guide/en/kibana/current/discover.html) 
 
+A couple of important remarks before we dive deeper:
+1. **This is not a standalone solution**, it is an **add-on** supposed to be run with an existing installation. This means you won't find a docker-compose.
+2. You need to set up your own [Elastic Logstash](https://www.elastic.co/logstash) instance. This is not part of this repository.
+
+## What is Elastic?
+The [Elastic stack](https://www.elastic.co/elastic-stack/), is comprised of Elasticsearch, Kibana, Beats, and Logstash. You might know it as the [ELK Stack](https://www.elastic.co/what-is/elk-stack). It allows you to take data from heterogeneous sources, in any format, then search, analyze, and visualize.
+
+If you target an organization that already knows and loves [Elastic stack](https://www.elastic.co/elastic-stack/), [Intersystems-Monitoring](https://openexchange.intersystems.com/package/Intersystems-Monitoring) is a great add-on for your InterSystems IRIS and HealthShare HealthConnect-based solutions. If you are looking for a powerful way to monitor heterogeneous applications, you might want to tale a look at [Elastic stack](https://www.elastic.co/elastic-stack/) too!
+
+[Itzos](https://itzos.com/), a Dutch systems integrator, has been using [Intersystems-Monitoring](https://openexchange.intersystems.com/package/Intersystems-Monitoring) for years to allow them viewing the state and events of the many InterSystems IRIS and HealthConnect instances they run using [Kibana Discover](https://www.elastic.co/guide/en/kibana/current/discover.html) - and they love it. They felt that sharing this with the InterSystems Community was a great way to give back.
 
 ## Event Sources - What information is transmitted to logstash
 The following information is being transmitted to logstash:
