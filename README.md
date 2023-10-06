@@ -38,7 +38,9 @@ InterSystems-Monitoring can be installed from package intersystems-monitoring us
 
 Before that, make sure that you have a new namespace where you run the Monitoring production, which we usually call "MONITORING"
 
-You might use method **PreInstall()** in class **IRISELK.Setup.installer**, like:
+You might use method **PreInstall()** in class **IRISELK.Setup.installer** which you can download here: [installer.cls](https://raw.githubusercontent.com/ItzosNL/Intersystems-Monitoring-Elastic/master/src/IRISELK/Setup/installer.cls).
+
+You need to compile it and then call **PreInstall()**:
 
 `set sc = ##class(IRISELK.Setup.installer).PreInstall()`
 
