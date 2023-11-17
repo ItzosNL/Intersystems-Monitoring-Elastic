@@ -47,7 +47,8 @@ Method SendToLogstash(pRequest As Ens.Request, Output pResponse As IRISELK.Messa
 		do ..SetProxy(config."logstash-proxy-address")
 
 		/// Use url from config
-		set sc = ..Adapter.SendFormDataArray(.tResponse, "POST", tRequest, , .jsonstring, config."logstash-url")
+	  	do tRequest.EntityBody.Write(jsonstring)
+		set sc = ..Adapter.SendFormDataArray(.tResponse, "POST", tRequest, , , config."logstash-url")
 	}
 	else
 	{
