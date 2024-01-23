@@ -148,7 +148,7 @@ These are the steps needed to make that work:
     `do ##class(IRISELK.BusinessOperation.Config).SetConfig("your config json location")`
 
 ## Known issues
-There are no known issues at this point in time
+We just found out that the minimum supported IRIS version is 2022.2, due to the use of {}.%FromJSONFile()
 
 ## Finally
 Use or operation of this code is subject to acceptance of the license available in the code repository for this code.
