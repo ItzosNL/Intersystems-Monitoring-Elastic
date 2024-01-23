@@ -98,7 +98,7 @@ Method GetMessageHeadersInNamespace(req As IRISELK.Header.HeaderMonitorRequest, 
         set headerdata.TimeProcessed = rset.%Get("TimeProcessed")
         set headerdata.TypeDisplay = rset.%Get("Type")
 		set headerdata.Namespace = namespace
-        set headerdata.TimeProcessedDiff = $SYSTEM.SQL.DATEDIFF("ss", headerdata.TimeCreated, headerdata.TimeProcessed)
+        set headerdata.TimeProcessedDiff = $SYSTEM.SQL.DATEDIFF("ms", headerdata.TimeCreated, headerdata.TimeProcessed)
 
 		do req.HeaderData.Insert(headerdata)
 
