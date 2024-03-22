@@ -1,4 +1,4 @@
-Class IRISELK.System.SystemMonitorRequest Extends (Ens.Request, %JSON.Adaptor) [ Language = objectscript ]
+Class IRISELK.System.SystemMonitorRequest Extends IRISELK.Messages.LogstashRequest [ Language = objectscript ]
 {
 
 Property MonitorData As array Of %Double;

@@ -21,13 +21,8 @@ Property ServerClientName As %String;
 Parameter SETTINGS = "InstanceOTAP:Basic,InstanceDescription:Basic,ServerClientName:Basic";
 
 /// Common method to send a message to Logstash as JSON
-Method SendToLogstash(pRequest As Ens.Request, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
+Method SendToLogstash(pRequest As IRISELK.Messages.LogstashRequest, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
 {
-	// Convert message to JSON
-	set jsonstring = ""
-	do pRequest.%JSONExportToString(.jsonstring)
-	$$$TRACE(jsonstring)
-
 	// Fetch configMap items
 	#dim config as %DynamicObject = ##class(IRISELK.BusinessOperation.Config).Load(.sc)
 
@@ -35,6 +30,7 @@ Method SendToLogstash(pRequest As Ens.Request, Output pResponse As IRISELK.Messa
 	set tResponse = ##class(%Net.HttpResponse).%New()
 	set tRequest = ##class(%Net.HttpRequest).%New()
 
+	do pRequest.%JSONExportToStream(tRequest.EntityBody)
 	do ..SetHeaders(tRequest, config)
 
 	// POST message in JSON to Logstash
@@ -47,13 +43,12 @@ Method SendToLogstash(pRequest As Ens.Request, Output pResponse As IRISELK.Messa
 		do ..SetProxy(config."logstash-proxy-address")
 
 		/// Use url from config
-	  	do tRequest.EntityBody.Write(jsonstring)
 		set sc = ..Adapter.SendFormDataArray(.tResponse, "POST", tRequest, , , config."logstash-url")
 	}
 	else
 	{
 		/// Use hardwired config
-		set sc = ..Adapter.SendFormData(.tResponse, "POST", tRequest, , jsonstring)
+		set sc = ..Adapter.SendFormData(.tResponse, "POST", tRequest)
 	}
 
 	set pResponse = ##class(IRISELK.Messages.MonitorResponse).%New()

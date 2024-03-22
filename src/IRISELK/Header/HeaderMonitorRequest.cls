@@ -1,4 +1,4 @@
-Class IRISELK.Header.HeaderMonitorRequest Extends (Ens.Request, %JSON.Adaptor) [ Language = objectscript ]
+Class IRISELK.Header.HeaderMonitorRequest Extends IRISELK.Messages.LogstashRequest [ Language = objectscript ]
 {
 
 Property HeaderData As list Of IRISELK.Header.HeaderData;

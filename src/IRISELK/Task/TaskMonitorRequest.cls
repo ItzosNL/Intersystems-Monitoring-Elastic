@@ -1,4 +1,4 @@
-Class IRISELK.Task.TaskMonitorRequest Extends (Ens.Request, %JSON.Adaptor) [ Language = objectscript ]
+Class IRISELK.Task.TaskMonitorRequest Extends IRISELK.Messages.LogstashRequest [ Language = objectscript ]
 {
 
 Property TaskData As list Of IRISELK.Task.TaskData;

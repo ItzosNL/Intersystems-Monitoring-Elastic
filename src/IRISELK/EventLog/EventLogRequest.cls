@@ -1,4 +1,4 @@
-Class IRISELK.EventLog.EventLogRequest Extends (Ens.Request, %JSON.Adaptor) [ Language = objectscript ]
+Class IRISELK.EventLog.EventLogRequest Extends IRISELK.Messages.LogstashRequest [ Language = objectscript ]
 {
 
 Property EventLogData As list Of IRISELK.EventLog.EventLogData;

@@ -1,4 +1,4 @@
-Class IRISELK.License.LicenseMonitorRequest Extends (Ens.Request, %JSON.Adaptor) [ Language = objectscript ]
+Class IRISELK.License.LicenseMonitorRequest Extends IRISELK.Messages.LogstashRequest [ Language = objectscript ]
 {
 
 Property LicenseData As list Of IRISELK.License.LicenseData;

@@ -1,4 +1,4 @@
-Class IRISELK.ProductionData.ProductionMonitorRequest Extends (Ens.Request, %JSON.Adaptor) [ Language = objectscript ]
+Class IRISELK.ProductionData.ProductionMonitorRequest Extends IRISELK.Messages.LogstashRequest [ Language = objectscript ]
 {
 
 Property ProductionData As list Of IRISELK.ProductionData.ProductionData;

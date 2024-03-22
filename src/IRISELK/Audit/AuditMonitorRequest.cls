@@ -1,4 +1,4 @@
-Class IRISELK.Audit.AuditMonitorRequest Extends (Ens.Request, %JSON.Adaptor) [ Language = objectscript ]
+Class IRISELK.Audit.AuditMonitorRequest Extends IRISELK.Messages.LogstashRequest [ Language = objectscript ]
 {
 
 Property AuditData As list Of IRISELK.Audit.AuditMonitorData;
