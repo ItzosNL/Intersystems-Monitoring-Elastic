@@ -13,7 +13,7 @@ XData ProductionDefinition
     <Setting Target="Adapter" Name="CallInterval">60</Setting>
   </Item>
   <Item Name="IRISELK.Header.HeaderMonitorService" Category="" ClassName="IRISELK.Header.HeaderMonitorService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
-    <Setting Target="Adapter" Name="CallInterval">60</Setting>
+    <Setting Target="Adapter" Name="CallInterval">10</Setting>
   </Item>
   <Item Name="IRISELK.BusinessOperation.LogstashOutbound" Category="" ClassName="IRISELK.BusinessOperation.LogstashOutbound" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
   </Item>

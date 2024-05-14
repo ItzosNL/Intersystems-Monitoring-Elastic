@@ -36,6 +36,10 @@ The package has a post-install step that configures IRISELK.FoundationProduction
 ## Seting up InterSystems-Monitoring
 InterSystems-Monitoring can be installed from package intersystems-monitoring using InterSystems Package Manager (ZPM).
 
+**Installing ObjectScript Package Manager Client:**
+
+`s r=##class(%Net.HttpRequest).%New(),r.Server="pm.community.intersystems.com",r.SSLConfiguration="ISC.FeatureTracker.SSL.Config" d r.Get("/packages/zpm/latest/installer"),$system.OBJ.LoadStream(r.HttpResponse.Data,"c")`
+
 Before that, make sure that you have a new namespace where you run the Monitoring production, which we usually call "MONITORING"
 
 You might use method **PreInstall()** in class **IRISELK.Setup.installer** which you can download here: [installer.cls](https://github.com/ItzosNL/Intersystems-Monitoring-Elastic/blob/master/src/IRISELK/Setup/installer.cls).

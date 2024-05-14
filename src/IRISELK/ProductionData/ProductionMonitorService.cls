@@ -25,9 +25,9 @@ ClassMethod GetProductDataForAllNamespaces() As IRISELK.ProductionData.Productio
     {
         set prddata =  ..GetProductionInformation(namespaces.GetAt(i))
 
-        if (prddata '= "")
+        for j = 1:1:prddata.Count()
         {
-            do req.ProductionData.Insert(prddata)
+            do req.ProductionData.Insert(prddata.GetAt(j))
         }
     }
 
@@ -35,15 +35,16 @@ ClassMethod GetProductDataForAllNamespaces() As IRISELK.ProductionData.Productio
 }
 
 /// Get Production Information in the specified namespace
-ClassMethod GetProductionInformation(namespace As %String) As IRISELK.ProductionData.ProductionData
+ClassMethod GetProductionInformation(namespace As %String) As %ListOfObjects
 {
     new $NAMESPACE
     set $NAMESPACE = namespace
 
+    set prdlist = ##class(%ListOfDataTypes).%New()
     set prdRS = ##class(%ResultSet).%New("Ens.Config.Production:ProductionStatus")
     do prdRS.Execute()
 
-    if (prdRS.Next())
+    while (prdRS.Next())
     {
         set prddata = ##class(IRISELK.ProductionData.ProductionData).%New()
         set prddata.NameSpace = namespace
@@ -61,10 +62,10 @@ ClassMethod GetProductionInformation(namespace As %String) As IRISELK.Production
             set prddata.LastStopTime = prdRS.Data("LastStopTime")
         }
 
-		return prddata
+		do prdlist.Insert(prddata)
     }
 
-	return ""
+	return prdlist
 }
 
 /// Get list of all Foundation namespaces
