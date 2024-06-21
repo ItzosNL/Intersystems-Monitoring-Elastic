@@ -36,6 +36,11 @@ ClassMethod Load(Output sc As %Status) As %DynamicObject
 	
     }
 
+    if $ISOBJECT(json.monitoring)
+    {
+        return json.monitoring
+    }
+
 	return json
 }
 
