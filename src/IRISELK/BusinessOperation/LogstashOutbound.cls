@@ -141,71 +141,11 @@ ClassMethod SetHeader(tRequest As %Net.HttpRequest, name As %String, value As %S
 	$$$TRACE(name _ "=" _ value)
 }
 
-Method SendLoginInfo(pRequest As IRISELK.Audit.AuditMonitorRequest, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
-{
-	do ..SendToLogstash(pRequest, pResponse)
-	return $$$OK
-}
-
-Method SendSystemInfo(pRequest As IRISELK.System.SystemMonitorRequest, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
-{
-	do ..SendToLogstash(pRequest, pResponse)
-	return $$$OK
-}
-
-Method SendProductionInfo(pRequest As IRISELK.ProductionData.ProductionMonitorRequest, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
-{
-	do ..SendToLogstash(pRequest, pResponse)
-	return $$$OK
-}
-
-Method SendEventLog(pRequest As IRISELK.EventLog.EventLogRequest, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
-{
-	do ..SendToLogstash(pRequest, pResponse)
-	return $$$OK
-}
-
-Method SendHeaderInfo(pRequest As IRISELK.Header.HeaderMonitorRequest, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
-{
-	do ..SendToLogstash(pRequest, pResponse)
-	return $$$OK
-}
-
-Method SendTaskInfo(pRequest As IRISELK.Task.TaskMonitorRequest, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
-{
-	do ..SendToLogstash(pRequest, pResponse)
-	return $$$OK
-}
-
-Method SendLicenseInfo(pRequest As IRISELK.License.LicenseMonitorRequest, Output pResponse As IRISELK.Messages.MonitorResponse) As %Status
-{
-	do ..SendToLogstash(pRequest, pResponse)
-	return $$$OK
-}
-
 XData MessageMap
 {
 <MapItems>
-	<MapItem MessageType="IRISELK.Audit.AuditMonitorRequest"> 
-		<Method>SendLoginInfo</Method>
-	</MapItem>
-	<MapItem MessageType="IRISELK.System.SystemMonitorRequest"> 
-		<Method>SendSystemInfo</Method>
-	</MapItem>
-	<MapItem MessageType="IRISELK.ProductionData.ProductionMonitorRequest"> 
-		<Method>SendProductionInfo</Method>
-	</MapItem>
-	<MapItem MessageType="IRISELK.EventLog.EventLogRequest"> 
-		<Method>SendEventLog</Method>
-	</MapItem>
-	<MapItem MessageType="IRISELK.Header.HeaderMonitorRequest"> 
-		<Method>SendHeaderInfo</Method>
-	</MapItem>
-	<MapItem MessageType="IRISELK.Task.TaskMonitorRequest"> 
-		<Method>SendTaskInfo</Method>
-	</MapItem>
-	<MapItem MessageType="IRISELK.License.LicenseMonitorRequest"> 
-		<Method>SendLicenseInfo</Method>
+	<MapItem MessageType="IRISELK.Audit.LogstashRequest"> 
+		<Method>SendToLogstash</Method>
 	</MapItem>
 </MapItems>
 }
