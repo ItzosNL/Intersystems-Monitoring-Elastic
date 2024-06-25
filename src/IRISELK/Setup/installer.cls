@@ -6,6 +6,8 @@ Class IRISELK.Setup.installer
 
 Parameter Namespace As String = "MONITORING";
 
+Parameter PackageName As String = "IRISELK";
+
 Parameter ProductionName As String = "IRISELK.FoundationProduction";
 
 /// PrintNamespace
@@ -51,7 +53,7 @@ ClassMethod PostInstall(productionName As %String = {..#ProductionName}, namespa
 }
 
 /// Create %All Namespace for package mappings if it doesn't exist
-ClassMethod CreatePackageMappingToALL(namespace As %String = "", packagename As %String = "IRISELK")
+ClassMethod CreatePackageMappingToALL(namespace As %String = "", packagename As %String = {..#PackageName})
 {
 	New $NAMESPACE
 	Set $NAMESPACE = "%SYS"
@@ -193,28 +195,34 @@ ClassMethod CompileProduction(productionName As %String = {..#ProductionName}, n
 /// Making a production Auto-Start
 ClassMethod AutoStartProduction(productionName As %String = {..#ProductionName}, namespace As %String = {..#Namespace}) As %Status
 {
-	New $NAMESPACE
-	Set $NAMESPACE = namespace
+	new $NAMESPACE
+	set $NAMESPACE = namespace
+	set sc = $$$OK
 
 	// Only start production of not already running
 	if '##class(Ens.Director).IsProductionRunning()
 	{
+        write "Start Production ",productionName,": "
 		set sc = ##class(Ens.Director).StartProduction(productionName)
 
 		if $$$ISERR(sc)
 		{
-			do $System.Status.DisplayError(sc)
+			write " failed: ",$System.Status.GetErrorText(sc)
+			return sc
 		}
 	}
 
+    write "Make sure Production ",productionName," autostarts: "
 	set sc = ##class(Ens.Director).SetAutoStart(productionName)
 
 	if $$$ISERR(sc)
 	{
-		Do $System.Status.DisplayError(sc)
+        write " failed: ",$System.Status.GetErrorText(sc)
 	}
 
-	return $$$OK
+    write !
+
+	return sc
 }
 
 }

@@ -5,13 +5,31 @@ Include %occErrors
 Class IRISELK.BusinessOperation.Config
 {
 
+/// Node from the after-install.config processed by this class.
+Parameter AfterInstallNode = "monitoring";
+
+/// Requires filename instead of DynamicObject 
+Parameter AfterInstallMode = "file";
+
+/// Load config
+ClassMethod LoadFile(filename As %String)
+{
+    new $NAMESPACE
+    set $NAMESPACE = "MONITORING"
+
+    do ..SetConfig(filename)
+
+    do ##class(IRISELK.Setup.installer).AutoStartProduction()
+}
+
 /// SetConfig - pass in the json config file name
 ClassMethod SetConfig(filename As %String = {##class(%SYSTEM.Util).ManagerDirectory() _ "config.json"})
 {
+    write "Monitoring.SetConfig(""",filename,""") in namespace ",$NAMESPACE,!
     set ^AAISMonitoringConfig = filename
 }
 
-/// Load confog from file
+/// Load config from file
 ClassMethod Load(Output sc As %Status) As %DynamicObject
 {
 	set sc = $$$OK
