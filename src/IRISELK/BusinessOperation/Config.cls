@@ -17,6 +17,9 @@ ClassMethod LoadFile(filename As %String)
     new $NAMESPACE
     set $NAMESPACE = "MONITORING"
 
+	// Load latest intersystems-monitoring package
+	ZPM "install intersystems-monitoring"
+
     do ..SetConfig(filename)
 
     do ##class(IRISELK.Setup.installer).AutoStartProduction()
