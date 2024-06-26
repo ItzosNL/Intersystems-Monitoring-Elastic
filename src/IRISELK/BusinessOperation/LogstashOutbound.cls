@@ -144,7 +144,7 @@ ClassMethod SetHeader(tRequest As %Net.HttpRequest, name As %String, value As %S
 XData MessageMap
 {
 <MapItems>
-	<MapItem MessageType="IRISELK.Audit.LogstashRequest"> 
+	<MapItem MessageType="IRISELK.Messages.LogstashRequest"> 
 		<Method>SendToLogstash</Method>
 	</MapItem>
 </MapItems>
