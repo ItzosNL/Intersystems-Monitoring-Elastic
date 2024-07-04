@@ -33,16 +33,21 @@ ClassMethod SetConfig(filename As %String = {##class(%SYSTEM.Util).ManagerDirect
 }
 
 /// Load config from file
-ClassMethod Load(Output sc As %Status) As %DynamicObject
+ClassMethod Load(Output sc As %Status, section As %String = "monitoring") As %DynamicObject
 {
 	set sc = $$$OK
-	set json = ""
+	#dim json as %DynamicObject = ""
 
     if $GET(^AAISMonitoringConfig) '= ""
     {
         try
         {
             set json = {}.%FromJSONFile(^AAISMonitoringConfig)
+
+            if $ISOBJECT(json.%Get(section))
+            {
+                return json.%Get(section)
+            }
         }
         catch error
         {
@@ -55,11 +60,6 @@ ClassMethod Load(Output sc As %Status) As %DynamicObject
     {
         set sc = $System.Status.Error($$$GeneralError, "Global ^AAISMonitoringConfig has not been configured")
 	
-    }
-
-    if $ISOBJECT(json.monitoring)
-    {
-        return json.monitoring
     }
 
 	return json
