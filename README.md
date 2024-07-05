@@ -151,6 +151,39 @@ These are the steps needed to make that work:
 	
     `do ##class(IRISELK.BusinessOperation.Config).SetConfig("your config json location")`
 
+
+## Utils.supressError
+SupressError has been made to supress an error that has been spamming alot. With a function call an error text can be added to a persistant value, that is later called on by the ErrorHandler BS. (It contains 2 persistant values)
+In this BS the error text is check with the text that needs to be supressed, and if it matches it will set the prio to a 4 (supressed).
+The Utils file also contains functions that can be called in a terminal to unsupress, or display all the errors.
+
+## Utils.ErrorCodeFunctions
+The purpose if this function class it to add a consitansie when logging an exception.
+The class contains multiple ClassMethods:  one to log an exception and the others to create an exception with the standard textual output.
+This standard textual output (syntax) is as followed: `<className> - <Prio> <Source> - <FunctionalText> - <StatusText>`
+
+`<ClassName>`
+This is the name of the class.
+
+`<Prio>`
+This is the severity if the error standard range is from 1 - 4. All functions add a standard prio of 3.
+
+`<Source>`
+This is the source of the error and can be interpreted as the application that caused the error. A standard source can be added in the SETTINGS of the ErrorHandler BS
+
+`<FunctionalText>`
+This is a simple discription of the error.
+
+`<StatusText>`
+This is the standard status text of the error.
+
+The class file can be used seperatly from the Monitoring Production, however when the class file is used without the ErrorHandler BS, the function GetDefaultSource() needs to be edited to return a consistant string instead of getting a global.
+This is because that function grabs the value from the DefaultSource setting in the ErrorHandler BS to use in the exceptions.
+
+
+To use the functions in the file either extend the class or call on the class when used, but it is recomended to extend the class.
+
+
 ## Known issues
 We just found out that the minimum supported IRIS version is 2022.2, due to the use of {}.%FromJSONFile()
 

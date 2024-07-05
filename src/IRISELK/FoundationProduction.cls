@@ -9,6 +9,9 @@ XData ProductionDefinition
   <Item Name="IRISELK.Audit.AuditMonitorService" Category="" ClassName="IRISELK.Audit.AuditMonitorService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
     <Setting Target="Adapter" Name="CallInterval">60</Setting>
   </Item>
+  <Item Name="IRISELK.ErrorHandler.ErrorService" Category="" ClassName="IRISELK.ErrorHandler.ErrorService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+    <Setting Target="Adapter" Name="CallInterval">60</Setting>
+  </Item>
   <Item Name="IRISELK.EventLog.EventLogService" Category="" ClassName="IRISELK.EventLog.EventLogService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
     <Setting Target="Adapter" Name="CallInterval">60</Setting>
   </Item>
