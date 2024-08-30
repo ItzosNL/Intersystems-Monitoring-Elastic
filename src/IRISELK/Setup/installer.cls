@@ -192,7 +192,7 @@ ClassMethod CompileProduction(productionName As %String = {..#ProductionName}, n
 	return sc
 }
 
-/// Making a production Auto-Start
+/// Start production and make auto-start
 ClassMethod AutoStartProduction(productionName As %String = {..#ProductionName}, namespace As %String = {..#Namespace}) As %Status
 {
 	new $NAMESPACE
@@ -214,6 +214,39 @@ ClassMethod AutoStartProduction(productionName As %String = {..#ProductionName},
 
     write "Make sure Production ",productionName," autostarts: "
 	set sc = ##class(Ens.Director).SetAutoStart(productionName)
+
+	if $$$ISERR(sc)
+	{
+        write " failed: ",$System.Status.GetErrorText(sc)
+	}
+
+    write !
+
+	return sc
+}
+
+/// Stop the production and remove auto-start
+ClassMethod StopProduction(namespace As %String = {..#Namespace}) As %Status
+{
+	new $NAMESPACE
+	set $NAMESPACE = namespace
+	set sc = $$$OK
+
+	// Only start production of not already running
+	if '##class(Ens.Director).IsProductionRunning()
+	{
+        write "Stop Production for namespace ",namespace,": "
+		set sc = ##class(Ens.Director).StopProduction()
+
+		if $$$ISERR(sc)
+		{
+			write " failed: ",$System.Status.GetErrorText(sc)
+			return sc
+		}
+	}
+
+    write "Remove Autostart for namespace ",namespace,": "
+	set sc = ##class(Ens.Director).SetAutoStart()
 
 	if $$$ISERR(sc)
 	{

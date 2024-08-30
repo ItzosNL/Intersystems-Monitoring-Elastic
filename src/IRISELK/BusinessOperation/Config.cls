@@ -17,12 +17,22 @@ ClassMethod LoadFile(filename As %String)
     new $NAMESPACE
     set $NAMESPACE = "MONITORING"
 
-	// Load latest intersystems-monitoring package
-	ZPM "install intersystems-monitoring"
-
     do ..SetConfig(filename)
 
-    do ##class(IRISELK.Setup.installer).AutoStartProduction()
+    // Only start the production if it is enabled!
+
+    set config = ..Load(.sc)
+
+    if $$$ISERR(sc) || ((config.enabled '= "") && (config.enabled = 0))
+    {
+        // In case of a configuration error, or when disabled, stop production and remove autostart
+        do ##class(IRISELK.Setup.installer).StopProduction()
+    }
+    else
+    {
+        // Start production and make autostartable
+        do ##class(IRISELK.Setup.installer).AutoStartProduction()
+    }
 }
 
 /// SetConfig - pass in the json config file name
