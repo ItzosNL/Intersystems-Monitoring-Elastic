@@ -44,7 +44,7 @@ ClassMethod LogError(exception As %Exception.AbstractException, koppelingName As
     if exception.%IsA("%Exception.SystemException") {
         
         set text = "Er is een systeem fout opgetreden"
-        set exc = ##Class(%Exception.SystemException).%New(koppelingName _ " -", 2 _ defaultSource _ " -",, text _ " - " _ exception.Name _ " #" _ exception.Code _ ": " _ exception.data)
+        set exc = ##Class(%Exception.SystemException).%New(koppelingName _ " -", 2 _ defaultSource _ " -",, text _ " - " _ exception.Name _ " #" _ exception.Code _ ": " _ exception.Data)
         //                                                             prio code ^   || Change if prio for system exceptions need different standard prio code || 
 
         $$$LOGERROR(exc.DisplayString())
@@ -72,7 +72,7 @@ ClassMethod LogError(exception As %Exception.AbstractException, koppelingName As
     }
     else 
     { 
-        $$$LOGERROR(koppelingName _ " - 1 - Unnone error " _ exception.Code _ ": " _ exception.data)
+        $$$LOGERROR(koppelingName _ " - 1 - Unnone error " _ exception.Code _ ": " _ exception.Data)
         if (retryRequest '= ""){
             set $PROPERTY(retryRequest, mustRetryPropertyName) = 0
         }
@@ -106,9 +106,9 @@ ClassMethod statusException(sc As %Status, functCode As %String, source As %Stri
 
     if (statEx.Code = 5035) // GeneralException
     {
-        set data = $PIECE(statEx.data, "-", 2, *)
+        set data = $PIECE(statEx.Data, "-", 2, *)
         set statEx.Code = $$$GeneralError
-        set statEx.data = data
+        set statEx.Data = data
     }
 
     if statEx.%IsA("%Exception.SystemException")
