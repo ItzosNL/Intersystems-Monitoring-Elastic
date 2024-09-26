@@ -98,8 +98,8 @@ ClassMethod statusException(sc As %Status, functCode As %String, source As %Stri
 
     if (source = "") { set source = defaultSource }
 
-    // Is there an HTTP status code 403 or 5xx, then assign it to defaultSource
-    if (source '= defaultSource) && ..HTTPStatusIs403Or5xx(statEx.DisplayString())
+    // If there isnt a HTTP status code 403 or 5xx, then assign it to defaultSource
+    if (source '= defaultSource) && '(..HTTPStatusIs403Or5xx(statEx.DisplayString()) )
     {
         set source = defaultSource
     }
