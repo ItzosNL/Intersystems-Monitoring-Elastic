@@ -52,7 +52,7 @@ ClassMethod PostInstall(productionName As %String = {..#ProductionName}, namespa
 	return $$$OK
 }
 
-/// Create %All Namespace for package mappings if it doesn't exist
+/// Create package mappings for package in %All namespace
 ClassMethod CreatePackageMappingToALL(namespace As %String = "", packagename As %String = {..#PackageName})
 {
 	New $NAMESPACE
