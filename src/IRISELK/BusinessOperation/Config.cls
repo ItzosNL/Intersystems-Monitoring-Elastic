@@ -52,8 +52,10 @@ ClassMethod Load(Output sc As %Status, section As %String = "monitoring") As %Dy
     {
         try
         {
-            set json = {}.%FromJSONFile(^AAISMonitoringConfig)
-
+            set stream = ##class(%Stream.FileCharacter).%New()
+            set sc = stream.LinkToFile(^AAISMonitoringConfig)
+            set json = ##class(%DynamicAbstractObject).%FromJSON(stream)
+ 
             if $ISOBJECT(json.%Get(section))
             {
                 return json.%Get(section)

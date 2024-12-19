@@ -183,6 +183,8 @@ This is because that function grabs the value from the DefaultSource setting in 
 
 To use the functions in the file either extend the class or call on the class when used, but it is recomended to extend the class.
 
+## Source
+Before starting up the Production make sure that you have filled in the *client* and the *default* Source. This can be done in the BS **ErrorHandler.ErrorService** under the tab *basic* 
 
 ## Known issues
 We just found out that the minimum supported IRIS version is 2022.2, due to the use of {}.%FromJSONFile()

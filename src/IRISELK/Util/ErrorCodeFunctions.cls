@@ -14,7 +14,7 @@ Class IRISELK.Util.ErrorCodeFunctions
 /// 
 ///     if (1 '= 1){
 ///         set exception = ..generalException("Fout tijdens ophalen van medewerker uit AFAS")
-///         do ..LogError(exception, "DZG500 testFuncties")
+///         do ..LogError(exception, $CLASSNAME())
 ///     }
 /// 
 /// =============
@@ -30,7 +30,7 @@ Class IRISELK.Util.ErrorCodeFunctions
 /// } catch exception {
 ///     set resultRequest = ##class(responseForm).%New()
 ///     
-///     do ..LogError(exception, "DZG500 testFuncties", resultRequest)
+///     do ..LogError(exception, $CLASSNAME(), resultRequest)
 /// 
 /// }
 /// 
@@ -44,7 +44,7 @@ ClassMethod LogError(exception As %Exception.AbstractException, koppelingName As
     if exception.%IsA("%Exception.SystemException") {
         
         set text = "Er is een systeem fout opgetreden"
-        set exc = ##Class(%Exception.SystemException).%New(koppelingName _ " -", 2 _ defaultSource _ " -",, text _ " - " _ exception.Name _ " #" _ exception.Code _ ": " _ exception.Data)
+        set exc = ##Class(%Exception.SystemException).%New(koppelingName _ " -", 2 _ " " _ defaultSource _ " -",, text _ " - " _ exception.Name _ " #" _ exception.Code _ ": " _ exception.Data)
         //                                                             prio code ^   || Change if prio for system exceptions need different standard prio code || 
 
         $$$LOGERROR(exc.DisplayString())
@@ -87,34 +87,42 @@ ClassMethod LogError(exception As %Exception.AbstractException, koppelingName As
 /// <EXAMPLE>
 ///  set sc = ..SendRequestSync()
 ///  if ('sc){
-///     throw ..statusException(sc, "Functional description", "A", 2)
+///     throw ..statusException(sc, "Functional description", 2)
 ///  }
 /// </EXAMPLE>
-ClassMethod statusException(sc As %Status, functCode As %String, source As %String = "", prio As %Integer = 3) As %Exception.StatusException
+ClassMethod statusException(sc As %Status, functCode As %String, prio As %Integer = 3) As %Exception.StatusException
 {
     #dim statEx as %Exception.AbstractException = ##class(%Exception.StatusException).CreateFromStatus(sc)
-
-    set defaultSource = ..GetDefaultSource()
-
-    if (source = "") { set source = defaultSource }
-
-    // If there isnt a HTTP status code 403 or 5xx, then assign it to defaultSource
-    if (source '= defaultSource) && '(..HTTPStatusIs403Or5xx(statEx.DisplayString()) )
-    {
-        set source = defaultSource
-    }
-
-    if (statEx.Code = 5035) // GeneralException
-    {
-        set data = $PIECE(statEx.Data, "-", 2, *)
-        set statEx.Code = $$$GeneralError
-        set statEx.Data = data
-    }
 
     if statEx.%IsA("%Exception.SystemException")
     {
         return statEx
     }
+
+    set source = ..GetDefaultSource()
+    set exData = statEx.DisplayString()
+
+    // If there isnt a HTTP status code 403 or 5xx, then assign it to defaultSource
+    if (..SourceNeedsToBeClientName(exData) )
+    {
+        set source = ..GetClientName()
+    }
+
+    if (statEx.Code = 5035) // GeneralException
+    {
+        set data = $PIECE(exData, "-", 2, *)
+        set error = $$$ERROR($$$GeneralError, data)
+        set statEx = ##class(%Exception.StatusException).CreateFromStatus(error)
+        
+    }
+    elseif ((statEx.Code = 6248) && (exData["SQLSTATE[22001]"))
+    {   
+        set stringData = $PIECE(exData, "'", 2)
+        set data = "SQL error string data to long for " _ stringData
+        set error = $$$ERROR($$$GeneralError, data)
+        set statEx = ##class(%Exception.StatusException).CreateFromStatus(error)
+
+    } 
 
     set statEx.Name = prio _ " " _ source _ " - " _ functCode _ " - "
 
@@ -126,24 +134,25 @@ ClassMethod statusException(sc As %Status, functCode As %String, source As %Stri
 /// NOTE: Adding a prio code is not necessary when it needs to be a prio 3.
 /// <EXAMPLE>
 /// if ( 1 '= 1 ){
-///     throw ..generalException("Functional description","A", 2)
+///     throw ..generalException("Functional description", 2)
 /// }
 /// </EXAMPLE>
-ClassMethod generalException(functCode As %String, source As %String = "", prio As %Integer = 3) As %Exception.General
+ClassMethod generalException(functCode As %String, prio As %Integer = 3) As %Exception.General
 {
-    set defaultSource = ..GetDefaultSource()
 
-    if (source = "") { set source = defaultSource }
+    set source = ..GetClientName()
 
-    if (source '= defaultSource) && ..ExceptionDataHasHTTP403Or5xx(functCode)
-    {
-        set source = defaultSource
+    #; // If there isnt a HTTP status code 403 or 5xx, then assign it to defaultSource
+    set dataHasHTTP403Or5xx = ..ExceptionDataHasHTTP403Or5xx(functCode, .matchFound)
+
+    if ( ('(dataHasHTTP403Or5xx) && (matchFound))){
+        set source = ..GetDefaultSource()
     }
 
     set data = functCode
-    set prio = prio _ " " _ source _ " -"
+    set prioCode = prio _ " " _ source _ " -"
 
-    return ##class(%Exception.General).%New(, prio, , data)
+    return ##class(%Exception.General).%New(, prioCode, , data)
 }
 
 /// Return a SQL exception in a standard format.
@@ -183,6 +192,14 @@ ClassMethod sqlException(SQLCode As %Integer, message As %String, functCode As %
     set prio = prio _ defaultSource _ " -"
 
     return ##class(%Exception.SQL).%New(, prio, , data)
+}
+
+/// Function that groups other functions to determin if the source needs to be the ClientName.
+ClassMethod SourceNeedsToBeClientName(data As %String) As %Boolean
+{
+    // For now only this function.
+    // Add more functions to filter if the source needs to be the ClientName.
+    return ..HTTPStatusIs403Or5xx(data)
 }
 
 /// Does this exception have an HTTP 403 or 5xx error?
@@ -231,8 +248,9 @@ ClassMethod HTTPStatusIs403Or5xx(data As %String) As %Boolean
 /// Is there an HTTP code 403 or 5xx anywhere in the exception data?
 /// Check if there is a HTTP status code anywhere in the exception
 /// Return true (1) if the code maches 403 or a 5xx status code else return false (0)
-ClassMethod ExceptionDataHasHTTP403Or5xx(data As %String) As %Boolean
+ClassMethod ExceptionDataHasHTTP403Or5xx(data As %String, ByRef matchFound As %Boolean) As %Boolean
 {
+    set matchFound = 0
     set HTTPCode = 0
     set matchHTTPCode = $LOCATE(data, "\d{3}")
 
@@ -241,10 +259,10 @@ ClassMethod ExceptionDataHasHTTP403Or5xx(data As %String) As %Boolean
         set precedingChar = $EXTRACT(data, matchHTTPCode - 1)
 
         // Is this a 3 digit number and not an Intersystems error code which would be preceded by a '#'?
-
         if (precedingChar '? 1N) && (precedingChar '? 1"#" ) && ($EXTRACT(data, matchHTTPCode + 3) '? 1N)
         {
             set HTTPCode = $EXTRACT(data, (matchHTTPCode), (matchHTTPCode+2))
+            set matchFound = 1
                                       // checks for 5xx status code 
             return ( (HTTPCode = 403 ) || (HTTPCode ? 1"5"2N) )
         }
@@ -259,6 +277,12 @@ ClassMethod ExceptionDataHasHTTP403Or5xx(data As %String) As %Boolean
 ClassMethod GetDefaultSource() As %String
 {
     return ^["MONITORING"]DefaultSource
+}
+
+ClassMethod GetClientName() As %String
+{
+
+    return ^["MONITORING"]ClientName
 }
 
 }

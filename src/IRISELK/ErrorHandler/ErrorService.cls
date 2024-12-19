@@ -8,19 +8,29 @@ Class IRISELK.ErrorHandler.ErrorService Extends Ens.BusinessService [ Language =
 
 Parameter ConfigName = "IRISELK.ErrorHandler.ErrorService";
 
-Property DefaultSource As %String;
-
 /// Define the default source code for the errors
 Parameter ADAPTER = "Ens.InboundAdapter";
 
-Parameter SETTINGS = "DefaultSource:Basic";
+/// Default source to log errors to if company source code could not be found
+Property DefaultSource As %String;
+
+/// Client code to compare the logged source code with
+/// It is expected to be around 2-3 characters long and capitalized (E.g. PH, PWR, LFG)
+Property ClientName As %String;
+
+Parameter SETTINGS = "DefaultSource:Basic,ClientName:Basic";
 
 /// Initialize the %Lastkey values
 Method OnInit() As %Status
 {
    
-
+    if ((..DefaultSource = "") || (..ClientName = "")){
+	   	set sc = $$$ERROR($$$GeneralError, "Default source or client name property not filled. Make sure they are filled!!")
+	   	return sc
+	}
+   
     set ^DefaultSource = ..DefaultSource
+    set ^ClientName = ..ClientName
 
 	#dim namespaces As %ListOfDataTypes = ##class(IRISELK.ProductionData.ProductionMonitorService).GetSupportedNamespaces()
 	for i = 1:1:namespaces.Count()
@@ -82,7 +92,7 @@ Method GetEventLogInNameSpace(req As IRISELK.ErrorHandler.Data.ErrorRequest, nam
     // Check if a suspended error needs to be unsupressed based on the time that was set for it 
     set suspendError2 = ..IsErrorSuspensionActive(2, .suspendText2)
 
-    // Query Type 2 en 6 (Errors en Alerts) from the eventLog
+    // Query Type 2 en 6 (Errors and Alerts) from the eventLog
     set query = "SELECT ID,ConfigName,Job,MessageId,SessionId,SourceClass,SourceMethod,Stack,Text,TimeLogged,Type "
                _"FROM Ens_Util.Log WHERE ID > ? AND (Type = 2 OR Type = 6) ORDER BY ID"
 	set tStatement = ##class(%SQL.Statement).%New()
@@ -90,52 +100,56 @@ Method GetEventLogInNameSpace(req As IRISELK.ErrorHandler.Data.ErrorRequest, nam
 	#dim rset As %SQL.StatementResult = tStatement.%Execute(lastkey)
 
 	while (rset.%Next())
-    {   
+    {
         // Set lastkey based on ID of row
         set lastkey = rset.%Get("ID")
-        set errorLogText = rset.%Get("Text")
-        set compareText = $PIECE(errorLogText, "-", 4)
-        set prioAndSource = $PIECE(errorLogText, "-", 2)
-        set prio = $PIECE(prioAndSource, " ", 2 )  
-        set source = $PIECE(prioAndSource, " ", 3 )
-        set maskedErrorLogText = ##class(IRISELK.Util.Filter).ReplaceData(errorLogText)
 
-        // Check if there is a prio in the logged error, if not set it.
-        if '(prio?1N) {
-            set prio = 2
-
-            if ( '(rset.%Get("SourceClass") = "Ens.Actor") && (rset.%Get("SourceMethod") = "MessageHeaderHandler") ){
-                set prio = 3
-            }
-        }
-
-        // If there is no source in the logged error set it to the defaultSource
-        if '(source?1A){
-            set source = ..DefaultSource
-        }
-    
-        // Check if the error needs to be suspended
-        do ..SetPrioAndSourceIfSuspended(1, suspendError1, compareText, suspendText1, .source, .prio)
-        do ..SetPrioAndSourceIfSuspended(2, suspendError2, compareText, suspendText2, .source, .prio)
-        
         // filter out user traces
         set eventdata = ##class(IRISELK.ErrorHandler.Data.ErrorData).%New()
 
         // check and filter stack and text fields because they might contain sensitive data
-        set eventdata.Stack = ##class(IRISELK.Util.Filter).ReplaceData(rset.%Get("Stack"))
-        set eventdata.Text = ##class(IRISELK.Util.Filter).ReplaceData(maskedErrorLogText)
-        set eventdata.ID = lastkey
-        set eventdata.ConfigName = rset.%Get("ConfigName")
-        set eventdata.Job = rset.%Get("Job")
-        set eventdata.MessageId = rset.%Get("MessageId")
-        set eventdata.SessionId = rset.%Get("SessionId")
-        set eventdata.SourceClass = rset.%Get("SourceClass")
-        set eventdata.SourceMethod = rset.%Get("SourceMethod")
-        set eventdata.TimeLogged = rset.%Get("TimeLogged")
-        set eventdata.Type = ##class(Ens.DataType.LogType).LogicalToDisplay(rset.%Get("Type"))
-        set eventdata.Namespace = namespace
-        set eventdata.SourceCode = source
-        set eventdata.Prio = prio
+        set eventdata.ID            = rset.%Get("ID")
+        set eventdata.ConfigName    = rset.%Get("ConfigName")
+        set eventdata.Job           = rset.%Get("Job")
+        set eventdata.MessageId     = rset.%Get("MessageId")
+        set eventdata.SessionId     = rset.%Get("SessionId")
+        set eventdata.SourceClass   = rset.%Get("SourceClass")
+        set eventdata.SourceMethod  = rset.%Get("SourceMethod")
+        set eventdata.Stack         = rset.%Get("Stack")
+        set eventdata.Text          = ##class(IRISELK.Util.Filter).ReplaceData(rset.%Get("Text"))
+        set eventdata.TimeLogged    = rset.%Get("TimeLogged")
+        set eventdata.Type          = rset.%Get("Type")
+        set eventdata.Namespace     = namespace
+
+        // Retrieve SourceCode and Prio from text
+        set eventdata.SourceCode    = $PIECE($PIECE(eventdata.Text, " - ", 2), " ", 2)
+        set eventdata.Prio          = $PIECE($PIECE(eventdata.Text, " - ", 2), " ", 1)
+
+        // If SourceCode is invalid, set to default
+        if (eventdata.SourceCode '= ..ClientName) {
+            set eventdata.SourceCode = ..DefaultSource
+        }
+
+        // Sets Prio to 2 (default) if invalid
+        // Prio range is [1, 4]
+        if '($ISVALIDNUM(eventdata.Prio) && ((eventdata.Prio >= 1) && (eventdata.Prio <= 4))) {
+            set eventdata.Prio = 2
+
+            if (rset.%Get("SourceMethod") = "MessageHeaderHandler"){
+                set eventdata.Prio = 3
+
+                if ( rset.%Get("Text")["SQLSTATE[22001]") {
+                    set eventdata.Prio = 4
+                }
+            }
+        }
+
+        // Retrieve status text from text
+        set compareText = $PIECE(eventdata.Text, "-", 4)
+
+        // Check if the error needs to be suspended
+        do ..SetPrioAndSourceIfSuspended(1, suspendError1, compareText, suspendText1, eventdata.SourceCode, eventdata.Prio)
+        do ..SetPrioAndSourceIfSuspended(2, suspendError2, compareText, suspendText2, eventdata.SourceCode, eventdata.Prio)
 
         do req.ErrorData.Insert(eventdata)
         

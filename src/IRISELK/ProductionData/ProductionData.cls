@@ -3,7 +3,7 @@ Class IRISELK.ProductionData.ProductionData Extends (%SerialObject, %XML.Adaptor
 
 Property NameSpace As %String;
 
-Property ProductionName As %String;
+Property ProductionName As %String(MAXLEN = 500);
 
 Property Status As %String;
 
