@@ -276,13 +276,13 @@ ClassMethod ExceptionDataHasHTTP403Or5xx(data As %String, ByRef matchFound As %B
 
 ClassMethod GetDefaultSource() As %String
 {
-    return ^["MONITORING"]DefaultSource
+    return $GET(^["MONITORING"]DefaultSource)
 }
 
 ClassMethod GetClientName() As %String
 {
 
-    return ^["MONITORING"]ClientName
+    return $GET(^["MONITORING"]ClientName)
 }
 
 }

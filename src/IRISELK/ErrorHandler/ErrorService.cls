@@ -11,26 +11,33 @@ Parameter ConfigName = "IRISELK.ErrorHandler.ErrorService";
 /// Define the default source code for the errors
 Parameter ADAPTER = "Ens.InboundAdapter";
 
-/// Default source to log errors to if company source code could not be found
+/// %String value that represents the default source code. If left empty an empty string is used instead.
+/// The value is used to identify errors that dont need to be send to the primary reciever of the errors.
+/// It is automaticaly assigned to an error when one is not already found in the exception or error. 
+/// More uses can be found in the IRISELK.Util.ErrorCodeFunctions class.
 Property DefaultSource As %String;
 
-/// Client code to compare the logged source code with
-/// It is expected to be around 2-3 characters long and capitalized (E.g. PH, PWR, LFG)
+/// Optional %String value to assign a Client source code. If left empty an empty string is used instead.
+/// The value is used to identify errors that dont need to be send to the primary reciever of the errors.
+/// It is assigend in IRISELK.Util.ErrorCodeFunctions to specific errors (see IRISELK.Util.ErrorCodeFunctions class for more info)
 Property ClientName As %String;
 
-Parameter SETTINGS = "DefaultSource:Basic,ClientName:Basic";
+/// Optional value that uses a Date or DataTime stamp in the format yyyy-mm-dd hh:mm:ss.
+/// It can be used when first starting up the BS to set the ID of the EventLog where the code begins its search for logged Errors or Alerts.
+/// When left empty it will use the highest ID from the EventLog from each namespace.
+Property EventLogTimeLogged As %String;
+
+Parameter SETTINGS = "DefaultSource:Basic,ClientName:Basic,EventLogTimeLogged:Basic";
 
 /// Initialize the %Lastkey values
 Method OnInit() As %Status
 {
-   
-    if ((..DefaultSource = "") || (..ClientName = "")){
-	   	set sc = $$$ERROR($$$GeneralError, "Default source or client name property not filled. Make sure they are filled!!")
-	   	return sc
-	}
-   
     set ^DefaultSource = ..DefaultSource
     set ^ClientName = ..ClientName
+   
+    if ((..DefaultSource = "") || (..ClientName = "")){
+        $$$LOGERROR("Default source or client name property not filled. Make sure they are filled!!")
+	}
 
 	#dim namespaces As %ListOfDataTypes = ##class(IRISELK.ProductionData.ProductionMonitorService).GetSupportedNamespaces()
 	for i = 1:1:namespaces.Count()
@@ -38,8 +45,19 @@ Method OnInit() As %Status
 		new $NAMESPACE
 		set $NAMESPACE = namespaces.GetAt(i)
 
-        // Persistant value that holds the last ID from a logged error or alert from a namespace
-        do ##class(EnsLib.SQL.InboundAdapter).InitializePersistentValue(..#ConfigName, "LastKeyError_" _ $NAMESPACE, 0)
+        // Initialize a Persistant value that holds the ID from a namespace's EventLog.
+        // Either uses the highest posible ID or if ..EventLogTimeLogged is filled in the lowest ID from the given date.
+        set sc = ..GetKeyValue(.keyValue)
+
+        // If you want it to start from a specific ID use the following captioned code to set the LastKeyError value.
+        // Add to the if-statement if you need the value to be changed for multiple namespaces.
+        #; if $NAMESPACE = "<namespace>" {
+        #;     do ##class(EnsLib.SQL.InboundAdapter).SetPersistentValue(..#ConfigName, "LastKeyError_" _ $NAMESPACE, <ID value>)
+        #; }
+
+        $$$TRACE("keyValue: " _ keyValue)
+        
+        do ##class(EnsLib.SQL.InboundAdapter).InitializePersistentValue(..#ConfigName, "LastKeyError_" _ $NAMESPACE, keyValue)
 
         // Persistant value that holds an error text that needs to be supressed (prio = 4)
         do ##class(EnsLib.SQL.InboundAdapter).InitializePersistentValue(..#ConfigName, "SuspendError_1", "0 -  - ")
@@ -125,9 +143,11 @@ Method GetEventLogInNameSpace(req As IRISELK.ErrorHandler.Data.ErrorRequest, nam
         set eventdata.SourceCode    = $PIECE($PIECE(eventdata.Text, " - ", 2), " ", 2)
         set eventdata.Prio          = $PIECE($PIECE(eventdata.Text, " - ", 2), " ", 1)
 
+        $$$TRACE("eventdata: " _ eventdata.SourceCode)
+
         // If SourceCode is invalid, set to default
-        if (eventdata.SourceCode '= ..ClientName) {
-            set eventdata.SourceCode = ..DefaultSource
+        if (eventdata.SourceCode '= $GET(^["MONITORING"]ClientName)) {
+            set eventdata.SourceCode = $GET(^["MONITORING"]DefaultSource)
         }
 
         // Sets Prio to 2 (default) if invalid
@@ -178,7 +198,7 @@ Method SetPrioAndSourceIfSuspended(suspendErrorNum As %Integer, suspendError As 
 
     if (suspendError && (compareText [ suspendText))
     {
-        set source = ..DefaultSource
+        set source = $GET(^["MONITORING"]DefaultSource)
         set suspendedCounter = ##class(EnsLib.SQL.InboundAdapter).GetPersistentValue(..#ConfigName, "SuspendCounter_" _ suspendErrorNum) + 1
 
         do ##class(EnsLib.SQL.InboundAdapter).SetPersistentValue(..#ConfigName, "SuspendCounter_" _ suspendErrorNum, suspendedCounter)
@@ -213,6 +233,41 @@ Method IsErrorSuspensionActive(suspendErrorNum As %Integer, ByRef SuspendedError
 
     set SuspendedErrorText = $PIECE(SuspendedErrorValue, "-", 2)
     return 1
+}
+
+/// Method to return an ID from the EventLog of a namespace.
+/// %ARG ByRef keyValue %Integer. This is the ID returned from a query on the EventLog DB table.
+Method GetKeyValue(ByRef keyValue As %Integer) As %Status
+{
+    set sc = $$$OK
+    set keyValue = 0
+
+    try {
+        if (..EventLogTimeLogged = ""){
+            set ..EventLogTimeLogged = $ZDATE($PIECE($HOROLOG, " ", 1), 3)
+        }
+
+        set eventLogTimeLogged = ..EventLogTimeLogged
+
+        &sql(SELECT MIN(ID) INTO :keyValue FROM Ens_Util.Log WHERE TimeLogged >= :eventLogTimeLogged )
+        if (SQLCODE<0) {
+            set keyValue = 0
+            $$$LOGERROR("Fout tijdens het ophalen van eerste EvenLog ID van datum: " _ eventLogTimeLogged _ ". Namespace" _ $NAMESPACE _ ". SQL message: "_ %msg)
+        }
+        
+        if (keyValue = "") {
+            &sql(SELECT MAX(ID) INTO :keyValue FROM Ens_Util.Log )
+            if (SQLCODE<0) {
+                set keyValue = 0
+                $$$LOGERROR("Fout tijdens het ophalen van meest resente EvenLog ID. Namespace: " _ $NAMESPACE _ ". SQL message: "_ %msg)
+            }
+            set:(keyValue = "") keyValue = 0
+        } 
+    } catch ex {
+        set sc = ex.AsStatus()
+    }
+
+    return sc
 }
 
 }
