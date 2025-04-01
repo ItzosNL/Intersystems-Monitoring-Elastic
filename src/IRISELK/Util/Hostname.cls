@@ -17,13 +17,16 @@ ClassMethod GetServiceOrHostName(Output namespace As %String) As %String
 }
 
 /// Get Kubernetes Namespace; return "" if not found
-ClassMethod GetK8sNamespace() As %String [ Language = python ]
+ClassMethod GetK8sNamespace() As %String
 {
-    try:
-        return open("/var/run/secrets/kubernetes.io/serviceaccount/namespace").read()
-    except:
-        return ""
-        pass
+    set file = ##class(%File).%New("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+
+    if $$$ISOK(file.Open("R"))
+    {
+        return file.ReadLine()
+    }
+
+    return ""
 }
 
 /// Get the service name for the pod
