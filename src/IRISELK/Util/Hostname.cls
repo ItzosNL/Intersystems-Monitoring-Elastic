@@ -29,31 +29,4 @@ ClassMethod GetK8sNamespace() As %String
     return ""
 }
 
-/// Get the service name for the pod
-/// Not used right now
-ClassMethod PyGetServiceNameForPod(namespace As %String, podname As %String) As %String [ Language = python ]
-{
-    try:
-        from kubernetes import client, config
-
-        #; Should work, but needs API server to accept Service credentials
-        #; config.load_incluster_config() 
-        #; Temporarily use our own credentials
-        config.load_kube_config(config_file='/home/irisowner/.kube/config')
-        kube_client = client.CoreV1Api()
-
-        pods = kube_client.list_namespaced_pod(namespace).items
-        for pod in pods:
-            if pod.metadata.name == podname:
-                #; print(pod.metadata.namespace, pod.metadata.name, pod.status)
-                #; print("%s\t%s\t%s" % (pod.status.pod_ip, pod.metadata.namespace, pod.metadata.name))
-                #; for cs in :
-                return pod.status.container_statuses[0].name
-
-    except:
-        pass
-
-    return ""
-}
-
 }
