@@ -20,7 +20,7 @@ ClassMethod GetMetrics() As IRISELK.System.SystemMonitorRequest
 		set key = $PIECE(line," ", 1)
 		set val = $PIECE(line," ", 2)
         
-        if (key '= "")
+        if (key '= "") && (+val = val)
         {
             #; write key,"=",val,!
             do req.MonitorData.SetAt(val, key)
