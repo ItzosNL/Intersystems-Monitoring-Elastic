@@ -109,6 +109,8 @@ ClassMethod StartsWith(sourceValue As %String, searchValue As %String) As %Boole
 Method SetHeaders(tRequest As %Net.HttpRequest, config As %DynamicObject)
 {
 	do ..SetHeader(tRequest, "server_name", ##class(IRISELK.Util.Hostname).GetServiceOrHostName(.ns))
+	do ..SetHeader(tRequest, "mp_version", ..GetPackageVersion())
+	do ..SetHeader(tRequest, "iris_version", $system.Version.Format(3))
 
 	if ns '= ""
 	{
@@ -139,6 +141,54 @@ ClassMethod SetHeader(tRequest As %Net.HttpRequest, name As %String, value As %S
 	do tRequest.SetHeader(name, value)
 
 	$$$TRACE(name _ "=" _ value)
+}
+
+/// Get current Version of Monitoring package
+ClassMethod GetPackageVersion(packageName As %String = "intersystems-monitoring") As %String
+{
+	if '##class(%Dictionary.CompiledClass).%ExistsId("%ZPM.PackageManager.Developer.Module")
+	{
+		// Don't error in namespaces with later versions that use %IPM
+		return ..GetIPMPackageVersion(packageName)
+	}
+
+	#dim result as %SQL.StatementResult = ##class(%SQL.Statement).%ExecDirect(, "SELECT VersionString FROM %ZPM_PackageManager_Developer.""Module"" WHERE Name = ?", packageName)
+
+	if (result.%SQLCODE < 0)
+	{
+		throw ##class(%Exception.SQL).CreateFromSQLCODE(result.%SQLCODE,result.%Message)
+	}
+
+	if result.%Next()
+	{
+		return result.VersionString
+	}
+
+	return ""
+}
+
+/// Get current Version of specified package
+ClassMethod GetIPMPackageVersion(packageName As %String) As %String
+{
+	if '$$$comClassDefined("%IPM.Storage.Module")
+	{
+		// Don't error in namespaces without IPM enabled
+		return ""
+	}
+
+	#dim result as %SQL.StatementResult = ##class(%SQL.Statement).%ExecDirect(, "SELECT VersionString FROM %IPM_Storage.ModuleItem WHERE Name = ?", packageName)
+
+	if (result.%SQLCODE < 0)
+	{
+		throw ##class(%Exception.SQL).CreateFromSQLCODE(result.%SQLCODE,result.%Message)
+	}
+
+	if result.%Next()
+	{
+		return result.VersionString
+	}
+
+	return ""
 }
 
 XData MessageMap
