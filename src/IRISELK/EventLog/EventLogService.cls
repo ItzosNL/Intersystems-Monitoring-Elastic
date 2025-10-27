@@ -53,7 +53,7 @@ Method GetEventLogInNameSpace(req As IRISELK.EventLog.EventLogRequest, namespace
     set $NAMESPACE = namespace
 
     set currentlastkey = ##class(EnsLib.SQL.InboundAdapter).GetPersistentValue(..%ConfigName, "LastKey_" _ namespace)
-    set query = "SELECT ID,ConfigName,Job,MessageId,SessionId,SourceClass,SourceMethod,Stack,Text,TimeLogged,TraceCat,Type FROM Ens_Util.Log WHERE ID > ?"
+    set query = "SELECT ID,ConfigName,Job,MessageId,SessionId,SourceClass,SourceMethod,Stack,Text,TimeLogged,TraceCat,Type FROM Ens_Util.Log WHERE ID > ? AND Type != 4"
 	set tStatement = ##class(%SQL.Statement).%New()
 	do tStatement.%Prepare(query)
 	#dim rset As %SQL.StatementResult = tStatement.%Execute(currentlastkey)
@@ -88,7 +88,7 @@ Method GetEventLogInNameSpace(req As IRISELK.EventLog.EventLogRequest, namespace
 			do req.EventLogData.Insert(eventdata)
 
 			// limit size of single message
-			if (rset.%ROWCOUNT > 50)
+			if (rset.%ROWCOUNT > 500)
 			{
 				quit
 			}
