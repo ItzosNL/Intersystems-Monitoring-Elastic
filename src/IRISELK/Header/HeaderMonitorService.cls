@@ -103,7 +103,7 @@ Method GetMessageHeadersInNamespace(req As IRISELK.Header.HeaderMonitorRequest, 
 		do req.HeaderData.Insert(headerdata)
 
 		// limit size of single message
-		if (rset.%ROWCOUNT >= 100)
+		if (rset.%ROWCOUNT >= 500)
 		{
 			quit
 		}
