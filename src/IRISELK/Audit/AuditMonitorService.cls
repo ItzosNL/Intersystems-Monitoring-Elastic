@@ -44,7 +44,7 @@ Method GetAuditLogs(req As IRISELK.Audit.AuditMonitorRequest, lastkey As %String
     set $NAMESPACE = "%SYS"
     set query = "SELECT ID, AuditIndex, Authentication, CSPSessionID, ClientExecutableName, ClientIPAddress, Description," _
                 "Event, EventData, EventSource, EventType, GroupName, JobId, JobNumber, Namespace, OSUsername, Pid, Roles," _
-                "RoutineSpec, Status, SystemID, UTCTimeStamp, UserInfo, Username FROM %SYS.Audit WHERE AuditIndex > ?"
+                "RoutineSpec, Status, SystemID, UTCTimeStamp, UserInfo, Username FROM %SYS.Audit WHERE AuditIndex > ? AND Username != 'UnknownUser'"
 	set tStatement = ##class(%SQL.Statement).%New()
 	do tStatement.%Prepare(query)
 
@@ -82,7 +82,7 @@ Method GetAuditLogs(req As IRISELK.Audit.AuditMonitorRequest, lastkey As %String
         do req.AuditData.Insert(auditdata)
 
         // limit size of single message
-		if (rset.%ROWCOUNT >= 100) {
+		if (rset.%ROWCOUNT >= 500) {
 			quit
 		}
 	}
