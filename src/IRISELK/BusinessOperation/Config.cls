@@ -51,7 +51,7 @@ ClassMethod Load(Output sc As %Status, section As %String = "monitoring") As %Dy
     if $GET(^AAISMonitoringConfig) '= ""
     {
         try
-        {
+        {   
             set stream = ##class(%Stream.FileCharacter).%New()
             set sc = stream.LinkToFile(^AAISMonitoringConfig)
             set json = ##class(%DynamicAbstractObject).%FromJSON(stream)
@@ -62,7 +62,7 @@ ClassMethod Load(Output sc As %Status, section As %String = "monitoring") As %Dy
             }
         }
         catch error
-        {
+        {   
             set sc = error.AsStatus()
             w "Failed loading config from " _ ^AAISMonitoringConfig _ ": "
             do $SYSTEM.Status.DisplayError(sc)
@@ -71,7 +71,6 @@ ClassMethod Load(Output sc As %Status, section As %String = "monitoring") As %Dy
     else
     {
         set sc = $System.Status.Error($$$GeneralError, "Global ^AAISMonitoringConfig has not been configured")
-	
     }
 
 	return json

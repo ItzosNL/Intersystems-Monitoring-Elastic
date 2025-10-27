@@ -146,37 +146,20 @@ ClassMethod SetHeader(tRequest As %Net.HttpRequest, name As %String, value As %S
 /// Get current Version of Monitoring package
 ClassMethod GetPackageVersion(packageName As %String = "intersystems-monitoring") As %String
 {
-	if '##class(%Dictionary.CompiledClass).%ExistsId("%ZPM.PackageManager.Developer.Module")
+	if ##class(%Dictionary.CompiledClass).%ExistsId("%ZPM.PackageManager.Developer.Module")
 	{
-		// Don't error in namespaces with later versions that use %IPM
-		return ..GetIPMPackageVersion(packageName)
+		set table = "%ZPM_PackageManager_Developer.""Module"""		
 	}
-
-	#dim result as %SQL.StatementResult = ##class(%SQL.Statement).%ExecDirect(, "SELECT VersionString FROM %ZPM_PackageManager_Developer.""Module"" WHERE Name = ?", packageName)
-
-	if (result.%SQLCODE < 0)
+	elseif ##class(%Dictionary.CompiledClass).%ExistsId("%IPM.Storage.Module")
 	{
-		throw ##class(%Exception.SQL).CreateFromSQLCODE(result.%SQLCODE,result.%Message)
+		set table = "%IPM_Storage.ModuleItem"
 	}
-
-	if result.%Next()
+	else
 	{
-		return result.VersionString
-	}
-
-	return ""
-}
-
-/// Get current Version of specified package
-ClassMethod GetIPMPackageVersion(packageName As %String) As %String
-{
-	if '$$$comClassDefined("%IPM.Storage.Module")
-	{
-		// Don't error in namespaces without IPM enabled
 		return ""
 	}
 
-	#dim result as %SQL.StatementResult = ##class(%SQL.Statement).%ExecDirect(, "SELECT VersionString FROM %IPM_Storage.ModuleItem WHERE Name = ?", packageName)
+	#dim result as %SQL.StatementResult = ##class(%SQL.Statement).%ExecDirect(, "SELECT VersionString FROM " _ table _ " WHERE Name = ?", packageName)
 
 	if (result.%SQLCODE < 0)
 	{
