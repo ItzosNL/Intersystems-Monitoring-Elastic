@@ -79,9 +79,9 @@ ClassMethod GetSupportedNamespaces() As %ListOfDataTypes
 	{
 		set namespace = nsRS.Data("Nsp")
 
-		if (namespace = "HSLIB") || (namespace = "HSAALIB")
+		if "|HSLIB|HSAALIB|HSCOMMLIB|HSPD|HSPDLIB|HSPILIB|VIEWERLIB|" [ ("|" _ namespace _ "|")
 		{
-			continue // Do not include HSLIB or HSAALIB
+			continue // Do not include HSLIB or Healtshare System Namespaces
 		}
 
         if ..IsFoundationNameSpace(namespace)
