@@ -47,7 +47,7 @@ Method GetTaskHistory(req As IRISELK.Task.TaskMonitorRequest, lastkey As %String
     set tStatement = ##class(%SQL.Statement).%New()
     do tStatement.%Prepare(query)
     #dim rset As %SQL.StatementResult = tStatement.%Execute(lastkey)
-
+    
     while (rset.%Next())
     {
         // set lastkey
